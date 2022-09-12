@@ -2,6 +2,12 @@
 
 Suivre l'installion des dépendances via ce site : https://pimylifeup.com/raspberry-pi-rfid-rc522/
 
+Installer mqtt : 
+```
+sudo pip3 install paho-mqtt
+```
+
+
 
 # Une fois les dépendances installées
 
