@@ -3,12 +3,40 @@
 import time
 import RPi.GPIO as GPIO
 from mfrc522 import MFRC522
+import paho.mqtt.client as paho
+import json
+from paho import mqtt
 
+BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 2
 
+def on_connect(client, userdata, flags, rc, properties=None):
+    print("CONNACK received with code %s." % rc)
+
+def on_publish(client, userdata, mid, properties=None):
+    print("mid: " + str(mid))
+
+def on_subscribe(client, userdata, mid, granted_qos, properties=None):
+    print("Subscribed: " + str(mid) + " " + str(granted_qos))
+
+def on_message(client, userdata, msg):
+    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+
+client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
+client.on_connect = on_connect
+
+client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+client.username_pw_set("nathan", "gU#v.@8KC12;pE**eZ<t")
+client.connect("9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud", 8883)
+
+client.on_subscribe = on_subscribe
+client.on_message = on_message
+client.on_publish = on_publish
+
+client.subscribe("api/" + BADGER_ID, qos=1)
 
 try:
   while True:
@@ -32,10 +60,20 @@ try:
         for i in range(0, 4):
           if HEADER[i] != data[i]:
             print("Card is not valid")
+            time.sleep(DELAY)
             break
-        student_id = ''.join([str(x) for x in data[4:9]])
-        print('Student Id: %s' % student_id)
-        time.sleep(DELAY);
+          else:
+            student_id = ''.join([str(x) for x in data[4:9]])
+            print('Student Id: %s' % student_id)
+            client.loop_start()
+            x = {
+                "school_student_id": "202200" + student_id,
+            }
+            message = json.dumps(x)
+            client.publish("badger/" + BADGER_ID, payload=message, qos=1)
+            client.loop_stop()
+            time.sleep(DELAY);
+            break
       else:
         print("Authentication error")
     else:
