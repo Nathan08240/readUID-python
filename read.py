@@ -12,6 +12,9 @@ reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 2
+USERNAME = "nathan"
+PASSWORD = "gU#v.@8KC12;pE**eZ<t"
+HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
 
 def on_connect(client, userdata, flags, rc, properties=None):
     print("CONNACK received with code %s." % rc)
@@ -29,8 +32,8 @@ client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
 client.on_connect = on_connect
 
 client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-client.username_pw_set("nathan", "gU#v.@8KC12;pE**eZ<t")
-client.connect("9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud", 8883)
+client.username_pw_set(USERNAME, PASSWORD)
+client.connect(HOST, 8883)
 
 client.on_subscribe = on_subscribe
 client.on_message = on_message
