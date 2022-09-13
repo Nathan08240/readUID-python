@@ -50,8 +50,10 @@ client.on_publish = on_publish
 client.subscribe("api/" + BADGER_ID, qos=1)
 print("Place your card to read UID")
 
+
 try:
     while True:
+        client.loop_start()
         (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
         if status == reader.MI_OK:
             print("Card detected")
@@ -70,24 +72,24 @@ try:
             if status == reader.MI_OK:
                 data = reader.MFRC522_Read(BLOCK_NUMBER)
                 reader.MFRC522_StopCrypto1()
-
-                # if HEADER[i] != data[i]:
+                # if HEADER != data[0:3]:
                 #     print("Card is not valid")
-                #     break
-
+                #     continue
                 student_id = ''.join([str(x) for x in data[4:11]])
                 print('Student Id: %s' % student_id)
-                client.loop_start()
                 message = json.dumps({
                     "school_student_id": student_id,
                 })
                 client.publish("badger/" + BADGER_ID,
                                payload=message, qos=1)
-                client.loop_stop()
                 time.sleep(DELAY)
+            client.loop_stop()
+
 
 except KeyboardInterrupt:
     print("Bye")
+    GPIO.cleanup()
+
 except Exception as e:
     print(e)
 finally:
