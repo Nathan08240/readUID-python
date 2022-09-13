@@ -3,9 +3,9 @@ import paho.mqtt.client as paho
 from paho import mqtt
 
 
-USERNAME = "nolah"
-PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
-HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
+USERNAME = ""
+PASSWORD = ""
+HOST = ""
 # setting callbacks for different events to see if it works, print the message etc.
 
 
