@@ -74,7 +74,6 @@ try:
                         break
                     else:
                         student_id = ''.join([str(x) for x in data[4:11]])
-                        print('Student Id: %s' % student_id)
                         client.loop_start()
                         print(student_id)
                         x = {
