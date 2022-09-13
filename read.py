@@ -11,10 +11,17 @@ BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
+<<<<<<< HEAD
 DELAY = 0.5
 USERNAME = "nolah"
 PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
 HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
+=======
+DELAY = 2
+USERNAME = ""
+PASSWORD = ""
+HOST = ""
+>>>>>>> ac37131165c6cbd2d7c02a64065cb3abdf624f79
 
 GPIO.setwarnings(False)
 
