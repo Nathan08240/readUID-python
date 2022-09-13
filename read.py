@@ -11,12 +11,11 @@ BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
-DELAY = 0.5
-USERNAME = ""
-PASSWORD = ""
-HOST = ""
+DELAY = 2
+USERNAME = "nolah"
+PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
+HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
 
-GPIO.cleanup()
 GPIO.setwarnings(False)
 
 
@@ -52,7 +51,6 @@ print("Place your card to read UID")
 
 try:
     while True:
-
         (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
         if status == reader.MI_OK:
             print("Card detected")
@@ -78,6 +76,7 @@ try:
                         break
                     else:
                         student_id = ''.join([str(x) for x in data[4:11]])
+                        print('Student Id: %s' % student_id)
                         client.loop_start()
                         x = {
                             "school_student_id": student_id,
@@ -87,10 +86,8 @@ try:
                                        payload=message, qos=1)
                         client.loop_stop()
                         time.sleep(DELAY)
+                        GPIO.cleanup()
                         break
-            else:
-                print("Authentication error")
-                GPIO.cleanup()
 
 except KeyboardInterrupt:
     print("Bye")
