@@ -11,10 +11,13 @@ BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
-DELAY = 2
+DELAY = 0.5
 USERNAME = ""
 PASSWORD = ""
 HOST = ""
+
+GPIO.cleanup()
+GPIO.setwarnings(False)
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -49,6 +52,7 @@ print("Place your card to read UID")
 
 try:
     while True:
+
         (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
         if status == reader.MI_OK:
             print("Card detected")
@@ -76,7 +80,6 @@ try:
                         student_id = ''.join([str(x) for x in data[4:11]])
                         print('Student Id: %s' % student_id)
                         client.loop_start()
-                        print(student_id)
                         x = {
                             "school_student_id": student_id,
                         }
