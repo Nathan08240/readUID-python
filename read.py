@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from nis import match
 import time
 import RPi.GPIO as GPIO
 from mfrc522 import MFRC522
@@ -7,14 +8,14 @@ import paho.mqtt.client as paho
 import json
 from paho import mqtt
 
-BADGER_ID = "cesi/reims/1"
+BADGER_ID = "cesi/reims/2"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 0.5
-USERNAME = ""
-PASSWORD = ""
-HOST = ""
+USERNAME = "nolah"
+PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
+HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
 BLOCK_NUMBER = 6
 
 GPIO.setwarnings(False)
@@ -36,7 +37,7 @@ def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
 
-client = paho.Client(client_id="badger_1", userdata=None, protocol=paho.MQTTv5)
+client = paho.Client(client_id="badger_2", userdata=None, protocol=paho.MQTTv5)
 client.on_connect = on_connect
 
 client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -51,15 +52,31 @@ client.subscribe("api/" + BADGER_ID, qos=1)
 print("Place your card to read UID")
 
 
+def checkCode(code):
+    if code == 0:
+        print("OK")
+    elif code == 1:
+        print("already registered")
+    elif code == 2:
+        print("Not found")
+    elif code == 3:
+        print("Incorrect input")
+    else:
+        print("Unknown")
+
+
 try:
     while True:
         client.loop_start()
         (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
         if status == reader.MI_OK:
             print("Card detected")
+        else:
+            client.loop_stop()
+            continue
         (status, uid) = reader.MFRC522_Anticoll()
         if uid is None:
-            time.sleep(DELAY)
+            client.loop_stop()
             continue
         if status == reader.MI_OK:
             # This is the default key for authentication
@@ -82,8 +99,11 @@ try:
                 })
                 client.publish("badger/" + BADGER_ID,
                                payload=message, qos=1)
+                client.loop_stop()
                 time.sleep(DELAY)
-            client.loop_stop()
+            else:
+                client.loop_stop()
+                print("Authentication error")
 
 
 except KeyboardInterrupt:
