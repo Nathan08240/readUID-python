@@ -11,17 +11,11 @@ BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
-<<<<<<< HEAD
 DELAY = 0.5
-USERNAME = "nolah"
-PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
-HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
-=======
-DELAY = 2
 USERNAME = ""
 PASSWORD = ""
 HOST = ""
->>>>>>> ac37131165c6cbd2d7c02a64065cb3abdf624f79
+BLOCK_NUMBER = 6
 
 GPIO.setwarnings(False)
 
@@ -42,7 +36,7 @@ def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
 
-client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
+client = paho.Client(client_id="badger_1", userdata=None, protocol=paho.MQTTv5)
 client.on_connect = on_connect
 
 client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -52,9 +46,6 @@ client.connect(HOST, 8883)
 client.on_subscribe = on_subscribe
 client.on_message = on_message
 client.on_publish = on_publish
-
-client.loop_start()
-client.loop_stop()
 
 client.subscribe("api/" + BADGER_ID, qos=1)
 print("Place your card to read UID")
@@ -66,6 +57,7 @@ try:
             print("Card detected")
         (status, uid) = reader.MFRC522_Anticoll()
         if uid is None:
+            time.sleep(DELAY)
             continue
         if status == reader.MI_OK:
             # This is the default key for authentication
@@ -73,36 +65,30 @@ try:
             reader.MFRC522_SelectTag(uid)
             # Authenticate
             status = reader.MFRC522_Auth(
-                reader.PICC_AUTHENT1A, 6, CARD_KEY, uid)
+                reader.PICC_AUTHENT1A, BLOCK_NUMBER, CARD_KEY, uid)
             # Check if authenticated
             if status == reader.MI_OK:
-                data = reader.MFRC522_Read(6)
+                data = reader.MFRC522_Read(BLOCK_NUMBER)
                 reader.MFRC522_StopCrypto1()
-                for i in range(0, 4):
-                    if HEADER[i] != data[i]:
-                        print("Card is not valid")
-                        GPIO.cleanup()
-                        break
-                    else:
-                        student_id = ''.join([str(x) for x in data[4:11]])
-                        print('Student Id: %s' % student_id)
-                        client.loop_start()
-                        message = json.dumps({
-                            "school_student_id": student_id,
-                        })
-                        client.publish("badger/" + BADGER_ID,
-                                       payload=message, qos=1)
-                        client.loop_stop()
-                        time.sleep(DELAY)
-                        GPIO.cleanup()
-                        break
+
+                # if HEADER[i] != data[i]:
+                #     print("Card is not valid")
+                #     break
+
+                student_id = ''.join([str(x) for x in data[4:11]])
+                print('Student Id: %s' % student_id)
+                client.loop_start()
+                message = json.dumps({
+                    "school_student_id": student_id,
+                })
+                client.publish("badger/" + BADGER_ID,
+                               payload=message, qos=1)
+                client.loop_stop()
+                time.sleep(DELAY)
 
 except KeyboardInterrupt:
     print("Bye")
-    GPIO.cleanup()
-
 except Exception as e:
     print(e)
-    GPIO.cleanup()
 finally:
     GPIO.cleanup()
