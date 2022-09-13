@@ -11,7 +11,7 @@ BADGER_ID = "cesi/reims/1"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
-DELAY = 2
+DELAY = 0.5
 USERNAME = "nolah"
 PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
 HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
@@ -46,6 +46,9 @@ client.on_subscribe = on_subscribe
 client.on_message = on_message
 client.on_publish = on_publish
 
+client.loop_start()
+client.loop_stop()
+
 client.subscribe("api/" + BADGER_ID, qos=1)
 print("Place your card to read UID")
 
@@ -71,17 +74,15 @@ try:
                 for i in range(0, 4):
                     if HEADER[i] != data[i]:
                         print("Card is not valid")
-                        time.sleep(DELAY)
                         GPIO.cleanup()
                         break
                     else:
                         student_id = ''.join([str(x) for x in data[4:11]])
                         print('Student Id: %s' % student_id)
                         client.loop_start()
-                        x = {
+                        message = json.dumps({
                             "school_student_id": student_id,
-                        }
-                        message = json.dumps(x)
+                        })
                         client.publish("badger/" + BADGER_ID,
                                        payload=message, qos=1)
                         client.loop_stop()
