@@ -13,9 +13,9 @@ reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 0.5
-USERNAME = "nolah"
-PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
-HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
+USERNAME = ""
+PASSWORD = "#"
+HOST = ""
 BLOCK_NUMBER = 6
 
 GPIO.setwarnings(False)
