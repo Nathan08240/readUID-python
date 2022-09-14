@@ -1,11 +1,14 @@
 import time
 import paho.mqtt.client as paho
+import os
+from dotenv import load_dotenv
 from paho import mqtt
 
+load_dotenv()
 
-USERNAME = "nolah"
-PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
-HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
+USERNAME = os.environ.get("USERNAME")
+PASSWORD = os.environ.get("PASSWORD")
+HOST = os.environ.get("HOST")
 # setting callbacks for different events to see if it works, print the message etc.
 
 
