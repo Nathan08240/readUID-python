@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 
 from code import interact
+from mfrc522 import MFRC522
+from paho import mqtt
+from dotenv import load_dotenv
 import time
 import RPi.GPIO as GPIO
-from mfrc522 import MFRC522
 import paho.mqtt.client as paho
 import json
-from paho import mqtt
+import os
+
+load_dotenv()
 
 BADGER_ID = "cesi/reims/2"
 reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 0.5
-USERNAME = ""
-PASSWORD = ""
-HOST = ""
+USERNAME = os.environ.get("USERNAME")
+PASSWORD = os.environ.get("PASSWORD")
+HOST = os.environ.get("HOST")
 BLOCK_NUMBER = 6
 
 PIN_BLUE_LED = 7
@@ -142,19 +146,19 @@ try:
             client.loop_stop()
             continue
         if status == reader.MI_OK:
-            # This is the default key for authentication
-            # Select the scanned tag
             reader.MFRC522_SelectTag(uid)
-            # Authenticate
             status = reader.MFRC522_Auth(
                 reader.PICC_AUTHENT1A, BLOCK_NUMBER, CARD_KEY, uid)
-            # Check if authenticated
             if status == reader.MI_OK:
                 data = reader.MFRC522_Read(BLOCK_NUMBER)
                 reader.MFRC522_StopCrypto1()
-                # if HEADER != data[0:3]:
-                #     print("Card is not valid")
-                #     continue
+                counter = 0
+                for i in range(0, 4):
+                    if HEADER[i] == data[i]:
+                        counter += 1
+                if counter != 4:
+                    print("Carte invalide !")
+                    continue
                 student_id = ''.join([str(x) for x in data[4:11]])
                 print('Student Id: %s' % student_id)
                 message = json.dumps({
