@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from nis import match
+from code import interact
 import time
 import RPi.GPIO as GPIO
 from mfrc522 import MFRC522
@@ -13,12 +13,23 @@ reader = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 0.5
-USERNAME = "nolah"
-PASSWORD = "#jz6DMAFn*XAr,$rW;P9"
-HOST = "9ee6fa03f5754817a1ead63bf198898a.s1.eu.hivemq.cloud"
+USERNAME = ""
+PASSWORD = ""
+HOST = ""
 BLOCK_NUMBER = 6
 
+PIN_BLUE_LED = 7
+PIN_GREEN_LED = 11
+PIN_RED_LED = 13
+PIN_YELLOW_LED = 12
+
+GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
+
+GPIO.setup(PIN_BLUE_LED, GPIO.OUT)
+GPIO.setup(PIN_GREEN_LED, GPIO.OUT)
+GPIO.setup(PIN_RED_LED, GPIO.OUT)
+GPIO.setup(PIN_YELLOW_LED, GPIO.OUT)
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -34,7 +45,8 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 
 def on_message(client, userdata, msg):
-    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
+    payload = json.loads(msg.payload)
+    checkCode(payload["code"])
 
 
 client = paho.Client(client_id="badger_2", userdata=None, protocol=paho.MQTTv5)
@@ -49,24 +61,75 @@ client.on_message = on_message
 client.on_publish = on_publish
 
 client.subscribe("api/" + BADGER_ID, qos=1)
-print("Place your card to read UID")
+
+
+def turnOnBlue():
+    GPIO.output(PIN_GREEN_LED, GPIO.LOW)
+    GPIO.output(PIN_BLUE_LED, GPIO.HIGH)
+    GPIO.output(PIN_RED_LED, GPIO.LOW)
+    GPIO.output(PIN_YELLOW_LED, GPIO.LOW)
+
+
+def turnOnGreen(delay):
+    GPIO.output(PIN_GREEN_LED, GPIO.HIGH)
+    GPIO.output(PIN_BLUE_LED, GPIO.LOW)
+    GPIO.output(PIN_RED_LED, GPIO.LOW)
+    GPIO.output(PIN_YELLOW_LED, GPIO.LOW)
+    time.sleep(delay)
+
+
+def turnOnRed(delay):
+    GPIO.output(PIN_GREEN_LED, GPIO.LOW)
+    GPIO.output(PIN_BLUE_LED, GPIO.LOW)
+    GPIO.output(PIN_RED_LED, GPIO.HIGH)
+    GPIO.output(PIN_YELLOW_LED, GPIO.LOW)
+    time.sleep(delay)
+
+
+def turnOnYellow(delay):
+    GPIO.output(PIN_GREEN_LED, GPIO.LOW)
+    GPIO.output(PIN_BLUE_LED, GPIO.LOW)
+    GPIO.output(PIN_RED_LED, GPIO.LOW)
+    GPIO.output(PIN_YELLOW_LED, GPIO.HIGH)
+    time.sleep(delay)
+
+
+def turnOff(delay):
+    GPIO.output(PIN_GREEN_LED, GPIO.LOW)
+    GPIO.output(PIN_BLUE_LED, GPIO.LOW)
+    GPIO.output(PIN_RED_LED, GPIO.LOW)
+    GPIO.output(PIN_YELLOW_LED, GPIO.LOW)
+    time.sleep(delay)
 
 
 def checkCode(code):
     if code == 0:
         print("OK")
+        turnOnGreen(1)
+        turnOnBlue()
     elif code == 1:
         print("already registered")
+        turnOnYellow(1)
+        turnOnBlue()
     elif code == 2:
         print("Not found")
+        turnOnRed(1)
+        turnOnBlue()
     elif code == 3:
         print("Incorrect input")
+        turnOnRed(1)
+        turnOnBlue()
     else:
         print("Unknown")
+        turnOnRed()
+        turnOnBlue()
 
+
+turnOnBlue()
 
 try:
     while True:
+
         client.loop_start()
         (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
         if status == reader.MI_OK:
