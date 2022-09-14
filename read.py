@@ -13,7 +13,7 @@ import os
 load_dotenv()
 
 BADGER_ID = "cesi/reims/2"
-reader = MFRC522()
+READER = MFRC522()
 HEADER = b'CESI'
 CARD_KEY = b'\xFF\xFF\xFF\xFF\xFF\xFF'
 DELAY = 0.5
@@ -21,6 +21,7 @@ USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
 HOST = os.environ.get("HOST")
 BLOCK_NUMBER = 6
+CLIENT_ID = "badger_2"
 
 PIN_BLUE_LED = 7
 PIN_GREEN_LED = 11
@@ -53,7 +54,7 @@ def on_message(client, userdata, msg):
     checkCode(payload["code"])
 
 
-client = paho.Client(client_id="badger_2", userdata=None, protocol=paho.MQTTv5)
+client = paho.Client(client_id=CLIENT_ID, userdata=None, protocol=paho.MQTTv5)
 client.on_connect = on_connect
 
 client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
@@ -135,23 +136,23 @@ try:
     while True:
 
         client.loop_start()
-        (status, TagType) = reader.MFRC522_Request(reader.PICC_REQIDL)
-        if status == reader.MI_OK:
+        (status, TagType) = READER.MFRC522_Request(READER.PICC_REQIDL)
+        if status == READER.MI_OK:
             print("Card detected")
         else:
             client.loop_stop()
             continue
-        (status, uid) = reader.MFRC522_Anticoll()
+        (status, uid) = READER.MFRC522_Anticoll()
         if uid is None:
             client.loop_stop()
             continue
-        if status == reader.MI_OK:
-            reader.MFRC522_SelectTag(uid)
-            status = reader.MFRC522_Auth(
-                reader.PICC_AUTHENT1A, BLOCK_NUMBER, CARD_KEY, uid)
-            if status == reader.MI_OK:
-                data = reader.MFRC522_Read(BLOCK_NUMBER)
-                reader.MFRC522_StopCrypto1()
+        if status == READER.MI_OK:
+            READER.MFRC522_SelectTag(uid)
+            status = READER.MFRC522_Auth(
+                READER.PICC_AUTHENT1A, BLOCK_NUMBER, CARD_KEY, uid)
+            if status == READER.MI_OK:
+                data = READER.MFRC522_Read(BLOCK_NUMBER)
+                READER.MFRC522_StopCrypto1()
                 counter = 0
                 for i in range(0, 4):
                     if HEADER[i] == data[i]:
