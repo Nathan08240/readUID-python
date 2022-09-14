@@ -1,4 +1,4 @@
-# readUID-python
+# readUID RFID en python sur Raspberry pi
 
 Suivre l'installion des dépendances via ce site : https://pimylifeup.com/raspberry-pi-rfid-rc522/
 
