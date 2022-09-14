@@ -7,6 +7,11 @@ Installer mqtt :
 sudo pip3 install paho-mqtt
 ```
 
+Installer dotenv :
+```
+sudo pip install python-dotenv
+```
+
 
 
 # Une fois les dépendances installées
@@ -19,6 +24,9 @@ mkdir read-python
 cd read-python
 git clone https://github.com/Nathan08240/readUID-python
 ```
+
+On se créer un fichier .env, il y a un ficher .env.exemple pour vous aider
+
 
 Et on lance avec la commande :
 
