@@ -158,6 +158,8 @@ try:
                     if HEADER[i] == data[i]:
                         counter += 1
                 if counter != 4:
+                    turnOnRed(1)
+                    turnOnBlue()
                     print("Carte invalide !")
                     continue
                 student_id = ''.join([str(x) for x in data[4:11]])
