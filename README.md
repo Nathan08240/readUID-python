@@ -36,25 +36,4 @@ sudo python3 read.py
 
 Vous êtes prêts !
 
-Pensez à inclure vos coordonnées de connexion pour MQTT dans les variables USERNAME, PASSWORD et HOST
-
-# Si cela ne fonctionne pas à la fin, suivre les instructions suivantes :
-
-Télécharger le dépot suivant : https://github.com/pimylifeup/MFRC522-python
-
-via la commande suivant : 
-
-```
-cd ~
-cd read-python
-git clone https://github.com/pimylifeup/MFRC522-python
-```
-
-Ensuite : 
-
-```
-cd MFRC522-python
-python setup.py install
-```
-
-Normalement tout devrait fonctionner ! 
+Pensez à inclure vos coordonnées de connexion pour MQTT dans les variables USERNAME, PASSWORD et HOST dans le ficher .env
